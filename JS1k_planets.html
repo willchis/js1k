@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://js1k.com/2014-dragons/shim-normal.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>JS1k, [COMPO] demo submission [ID]</title>
+		<meta charset="utf-8">
+    <style>
+      html, body { margin: 0; padding: 0; border: 0; }
+      #c { display: block; } /* kill scrollbars from hell */
+    </style>
+	</head>
+	<!--earth = {
+					x: sx + 100,
+					y: sy - 100,
+					vx: 5,
+					vy: 5,
+					size: 5
+				},
+				sun = {
+					x: sx,
+					y: sy,
+					vx: 0,
+					vy: 0,
+					size: 20
+				},
+				moon = {
+					x: earth.x + 20,
+					y: earth.y + 20,
+					vx: 50,
+					vy: 50,
+					size: 2
+				}
+				mars = {
+					x: sx + 150,
+					y: sy - 150,
+					vx: 8,
+					vy: 8,
+					size: 4
+				}
+				for (i=1; i < 500; i++){
+				var asteroid = {
+				x: sx + i * 5,
+				y: sy - i *5,
+				vx: 10,
+				vy: 10,
+				size: 2
+				};
+				
+				orbit(asteroid, sun, true, 2, 2, 'white');
+			}
+				-->
+	<body>
+		<canvas id="c" width="1302" height="739" style="width: 1302px; height: 739px;"></canvas>
+		<script>
+			var a = document.getElementsByTagName('canvas')[0];
+			var b = document.body;
+			  var d = function(e){ return function(){ e.parentNode.removeChild(e); }; }(a);
+			  // unprefix some popular vendor prefixed things (but stick to their original name)
+			  var AudioContext =
+			    window.AudioContext ||
+			    window.webkitAudioContext;
+			  var requestAnimationFrame =
+			    window.requestAnimationFrame ||
+			    window.mozRequestAnimationFrame ||
+			    window.webkitRequestAnimationFrame ||
+			    window.msRequestAnimationFrame ||
+			    function(f){ setTimeout(f, 1000/30); };
+			  // stretch canvas to screen size (once, wont onresize!)
+			  a.style.width = (a.width = innerWidth) + 'px';
+			  a.style.height = (a.height = innerHeight) + 'px';
+			
+			  var c = a.getContext('2d');
+		</script>
+		<script>
+
+			// start of submission //
+			var sx = a.width/2,
+				sy = a.height/2;
+			
+			function drawPlanet(x, y, r, col) {
+				c.beginPath();
+			    c.arc(x, y, r, 0, 2 * Math.PI, false);
+			  	c.fillStyle = col;
+			    c.fill();
+			}
+			
+			c.rect(0,0,sx*2,sy*2);
+			c.fillStyle="black";
+			c.fill();
+			
+			var p = function(x, y, vx, vy, size) {
+				this.x = x;
+				this.y = y;
+				this.vx = vx;
+				this.vy = vy;
+				this.size = size;
+			}
+			
+			var mars = new p(sx + 150, sy - 150, 8, 8, 4);
+			var earth = new p(sx + 100, sy - 100, 5, 5, 5);
+			var sun = new p(sx, sy, 0, 0, 20);
+			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 2);
+
+			drawPlanet(sx, sy, 10, 'yellow');
+			orbit(earth, sun, true, 1.5, 1.5, 'blue');
+			orbit(moon, earth, false, 3, 3, 'gray');
+			orbit(mars, sun, true, 1.5, 1.5, 'red');
+			
+			
+			function orbit(planet, centre, isFixedCentre, accX, accY, colour) {
+				var aX,
+					aY;
+					
+				setInterval(function() {
+					aX = (planet.x > centre.x) ? -accX : accX;
+					
+					aY = (planet.y > centre.y) ? -accY : accY;
+					
+					drawPlanet(planet.x, planet.y, planet.size + 0.5, 'black');
+					if (!isFixedCentre){
+						planet.x = centre.x;
+						planet.y = centre.y;
+					}
+					planet.x += planet.vx + (aX / 2);
+					planet.y += planet.vy + (aY / 2);
+					
+					drawPlanet(planet.x, planet.y, planet.size, colour);
+					planet.vx += aX /2;
+					planet.vy += aY /2;
+				}, 30)
+			}
+			// end of submission //
+		</script>
+	
+
+</body></html>
