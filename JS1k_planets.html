@@ -83,9 +83,7 @@
 			    c.fill();
 			}
 			
-			c.rect(0,0,sx*2,sy*2);
-			c.fillStyle="black";
-			c.fill();
+			
 			
 			var p = function(x, y, vx, vy, size) {
 				this.x = x;
@@ -95,17 +93,38 @@
 				this.size = size;
 			}
 			
-			var mars = new p(sx + 150, sy - 150, 8, 8, 4);
-			var earth = new p(sx + 100, sy - 100, 5, 5, 5);
+			var mars = new p(sx + 100, sy - 100, 6, 6, 8);
+			var earth = new p(sx + 50, sy - 50, 5, 5, 8);
 			var sun = new p(sx, sy, 0, 0, 20);
 			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 2);
+			var jupiter = new p(sx + 200, sy - 200, -10, -10, 15);
+			
+			setInterval(function() {
+				drawPlanet(sx, sy, 10, 'yellow');
+				c.clearRect(0,0,sx*2, sy*2);
+				c.rect(0,0,sx*2,sy*2);
+				c.fillStyle="black";
+				c.fill();
+			}, 30);
 
-			drawPlanet(sx, sy, 10, 'yellow');
 			orbit(earth, sun, true, 1.5, 1.5, 'blue');
 			orbit(moon, earth, false, 3, 3, 'gray');
 			orbit(mars, sun, true, 1.5, 1.5, 'red');
-			
-			
+			orbit(jupiter, sun, true, 1, 1, 'purple');
+			function random(total) {
+				return (Math.random() * total);
+			}
+			for (i=1; i < 1000; i++){
+				var asteroid = {
+				x: sx + i * 2,
+				y: sy - i * 2,
+				vx: random(1),
+				vy: random(1),
+				size: 2
+				};
+				
+				orbit(asteroid, sun, true, 1, 0.5, 'white');
+			}
 			function orbit(planet, centre, isFixedCentre, accX, accY, colour) {
 				var aX,
 					aY;
@@ -115,7 +134,7 @@
 					
 					aY = (planet.y > centre.y) ? -accY : accY;
 					
-					drawPlanet(planet.x, planet.y, planet.size + 0.5, 'black');
+					//drawPlanet(planet.x, planet.y, 1 + planet.size + planet.size * (planet.y - sy)/sy, 'black');
 					if (!isFixedCentre){
 						planet.x = centre.x;
 						planet.y = centre.y;
@@ -123,7 +142,7 @@
 					planet.x += planet.vx + (aX / 2);
 					planet.y += planet.vy + (aY / 2);
 					
-					drawPlanet(planet.x, planet.y, planet.size, colour);
+					drawPlanet(planet.x, planet.y, planet.size + planet.size * (planet.y - sy)/sy, colour);
 					planet.vx += aX /2;
 					planet.vy += aY /2;
 				}, 30)
