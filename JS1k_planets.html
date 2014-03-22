@@ -8,46 +8,6 @@
       #c { display: block; } /* kill scrollbars from hell */
     </style>
 	</head>
-	<!--earth = {
-					x: sx + 100,
-					y: sy - 100,
-					vx: 5,
-					vy: 5,
-					size: 5
-				},
-				sun = {
-					x: sx,
-					y: sy,
-					vx: 0,
-					vy: 0,
-					size: 20
-				},
-				moon = {
-					x: earth.x + 20,
-					y: earth.y + 20,
-					vx: 50,
-					vy: 50,
-					size: 2
-				}
-				mars = {
-					x: sx + 150,
-					y: sy - 150,
-					vx: 8,
-					vy: 8,
-					size: 4
-				}
-				for (i=1; i < 500; i++){
-				var asteroid = {
-				x: sx + i * 5,
-				y: sy - i *5,
-				vx: 10,
-				vy: 10,
-				size: 2
-				};
-				
-				orbit(asteroid, sun, true, 2, 2, 'white');
-			}
-				-->
 	<body>
 		<canvas id="c" width="1302" height="739" style="width: 1302px; height: 739px;"></canvas>
 		<script>
@@ -79,14 +39,15 @@
 				
 			
 			function drawPlanet(x, y, r, col) {
+			var rgrad = c.createRadialGradient(x,y,0,x,y,r);
+rgrad.addColorStop(0, col);
+rgrad.addColorStop(1, 'black');
 				c.beginPath();
 			    c.arc(x, y, r, 0, 2 * Math.PI, false);
-			  	c.fillStyle = col;
+			  	c.fillStyle = rgrad;
 			    c.fill();
 			}
-			
-			
-			
+
 			var p = function(x, y, vx, vy, ax, ay, size, centre, colour, cent) {
 				this.x = x;
 				this.y = y;
@@ -101,52 +62,45 @@
 			}
 			
 			var sun = new p(sx, sy, 0, 0, 0, 0, 20, null, 'yellow', false);
-			var mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 8, sun, 'red', false);
-			var earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 8, sun, 'blue', false);
+			var mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 10, sun, 'red', false);
+			var earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 10, sun, 'blue', false);
 			
-			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 2, earth, 'gray', true);
-			var jupiter = new p(sx + 200, sy - 200, -10, -10, 1, 1, 15, sun, 'purple', false);
+			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 5, earth, 'gray', true);
+			var jupiter = new p(sx + 200, sy - 200, -10, -10, 1.2, 1.2, 20, sun, 'purple', false);
 			planets = [ mars, earth, moon, jupiter];
 			
 			setInterval(function() {
 				
-				c.clearRect(0,0,sx*2, sy*2);
-				c.rect(0,0,sx*2,sy*2);
-				c.fillStyle="black";
-				c.fill();
-				stars();
+				
 				//drawPlanet(sx, sy, 10, 'yellow');
 			}, 30);
 
 			function random(total) {
 				return (Math.random() * total);
 			}
-			function stars() {
-			for (i=1; i < 100; i++){
-				//var asteroid = {
-				//x: sx + i * random(2),
-				//y: sy - 2 - i * 2,
-				//vx: 10 + random(10),
-				//vy: 10 + random(20),
-				//ax: 1,
-				//ay: 0.5,
-				//size: 1,
-				//centre: sun,
-				//colour: 'white',
-				//movCent: false,
-				//};
-				drawPlanet(random(2*sx), random(2*sy), random(2), 'white');
-				
-				//planets.push(asteroid);
-			}
+			function makeStars() {
+				var stars = [];
+				for (i=1; i < 100; i++){
+					stars.push({x: random(2*sx), y: random(2*sy), s: random(2)});
+				}
+				return stars;
 			}
 			
 			orbit();
 			function orbit() {
 				
-					
+				var ss = makeStars();
+				
 				setInterval(function() {
+					c.clearRect(0,0,sx*2, sy*2);
+					c.rect(0,0,sx*2,sy*2);
+					c.fillStyle="black";
+					c.fill();
 					
+					for (var j = 0; j < ss.length; j++) {
+						drawPlanet(ss[j].x, ss[j].y, random(2), 'white');
+					}
+						
 					for (var i = 0; i < planets.length; i++) {
 						
 						var	aX = (planets[i].x > planets[i].centre.x) ? -planets[i].ax : planets[i].ax;
