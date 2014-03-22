@@ -74,7 +74,9 @@
 
 			// start of submission //
 			var sx = a.width/2,
-				sy = a.height/2;
+				sy = a.height/2,
+				planets = [];
+				
 			
 			function drawPlanet(x, y, r, col) {
 				c.beginPath();
@@ -85,68 +87,142 @@
 			
 			
 			
-			var p = function(x, y, vx, vy, size) {
+			var p = function(x, y, vx, vy, ax, ay, size, centre, colour, cent) {
 				this.x = x;
 				this.y = y;
 				this.vx = vx;
 				this.vy = vy;
+				this.ax = ax;
+				this.ay = ay;
 				this.size = size;
+				this.centre = centre;
+				this.colour = colour;
+				this.movCent = cent;
 			}
 			
-			var mars = new p(sx + 100, sy - 100, 6, 6, 8);
-			var earth = new p(sx + 50, sy - 50, 5, 5, 8);
-			var sun = new p(sx, sy, 0, 0, 20);
-			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 2);
-			var jupiter = new p(sx + 200, sy - 200, -10, -10, 15);
+			var sun = new p(sx, sy, 0, 0, 0, 0, 20, null, 'yellow', false);
+			var mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 8, sun, 'red', false);
+			var earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 8, sun, 'blue', false);
+			
+			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 2, earth, 'gray', true);
+			var jupiter = new p(sx + 200, sy - 200, -10, -10, 1, 1, 15, sun, 'purple', false);
+			planets = [ mars, earth, moon, jupiter];
 			
 			setInterval(function() {
-				drawPlanet(sx, sy, 10, 'yellow');
+				
 				c.clearRect(0,0,sx*2, sy*2);
 				c.rect(0,0,sx*2,sy*2);
 				c.fillStyle="black";
 				c.fill();
+				stars();
+				//drawPlanet(sx, sy, 10, 'yellow');
 			}, 30);
 
-			orbit(earth, sun, true, 1.5, 1.5, 'blue');
-			orbit(moon, earth, false, 3, 3, 'gray');
-			orbit(mars, sun, true, 1.5, 1.5, 'red');
-			orbit(jupiter, sun, true, 1, 1, 'purple');
 			function random(total) {
 				return (Math.random() * total);
 			}
-			for (i=1; i < 1000; i++){
-				var asteroid = {
-				x: sx + i * 2,
-				y: sy - i * 2,
-				vx: random(1),
-				vy: random(1),
-				size: 2
-				};
+			function stars() {
+			for (i=1; i < 100; i++){
+				//var asteroid = {
+				//x: sx + i * random(2),
+				//y: sy - 2 - i * 2,
+				//vx: 10 + random(10),
+				//vy: 10 + random(20),
+				//ax: 1,
+				//ay: 0.5,
+				//size: 1,
+				//centre: sun,
+				//colour: 'white',
+				//movCent: false,
+				//};
+				drawPlanet(random(2*sx), random(2*sy), random(2), 'white');
 				
-				orbit(asteroid, sun, true, 1, 0.5, 'white');
+				//planets.push(asteroid);
 			}
-			function orbit(planet, centre, isFixedCentre, accX, accY, colour) {
-				var aX,
-					aY;
+			}
+			
+			orbit();
+			function orbit() {
+				
 					
 				setInterval(function() {
-					aX = (planet.x > centre.x) ? -accX : accX;
 					
-					aY = (planet.y > centre.y) ? -accY : accY;
-					
-					//drawPlanet(planet.x, planet.y, 1 + planet.size + planet.size * (planet.y - sy)/sy, 'black');
-					if (!isFixedCentre){
-						planet.x = centre.x;
-						planet.y = centre.y;
+					for (var i = 0; i < planets.length; i++) {
+						
+						var	aX = (planets[i].x > planets[i].centre.x) ? -planets[i].ax : planets[i].ax;
+						
+						var aY = (planets[i].y > planets[i].centre.y) ? -planets[i].ay : planets[i].ay;
+						
+						//drawPlanet(planet.x, planet.y, 1 + planet.size + planet.size * (planet.y - sy)/sy, 'black');
+						if (planets[i].movCent){ // null if fixed e.g. sun
+							planets[i].x = planets[i].centre.x;
+							planets[i].y = planets[i].centre.y;
+						}
+						planets[i].x += planets[i].vx + (aX / 2);
+						planets[i].y += planets[i].vy + (aY / 2);
+						
+						drawPlanet(planets[i].x, planets[i].y, planets[i].size + planets[i].size * (planets[i].y - sy)/sy, planets[i].colour);
+						planets[i].vx += aX /2;
+						planets[i].vy += aY /2;
 					}
-					planet.x += planet.vx + (aX / 2);
-					planet.y += planet.vy + (aY / 2);
-					
-					drawPlanet(planet.x, planet.y, planet.size + planet.size * (planet.y - sy)/sy, colour);
-					planet.vx += aX /2;
-					planet.vy += aY /2;
+					draw();
 				}, 30)
 			}
+			
+			
+	var particles = [];
+
+	
+	//Lets create some particles now
+	var particle_count = 50;
+	for(var i = 0; i < particle_count; i++)
+	{
+		particles.push(new particle());
+	}
+	
+	function particle()
+	{
+		this.speed = {x: -2.5+random(5), y: -3+random(4)};
+		this.location = {x: sx, y: sy};
+		this.radius = 10+random(10);
+		this.life = 20+random(10);
+		this.remaining_life = this.life;
+		this.r = m(random(255));
+		this.g = m(random(100));
+		this.b = m(random(25));
+	}
+	
+	function draw()
+	{
+		c.globalCompositeOperation = "lighter";
+		
+		for(var i = 0; i < particles.length; i++)
+		{
+			var p = particles[i];
+			c.beginPath();
+			p.opacity = m(p.remaining_life/p.life*100)/100
+			var gradient = c.createRadialGradient(p.location.x, p.location.y, 0, p.location.x, p.location.y, p.radius);
+			gradient.addColorStop(0, "rgba("+p.r+", "+p.g+", "+p.b+", "+p.opacity+")");
+			gradient.addColorStop(0.5, "rgba("+p.r+", "+p.g+", "+p.b+", "+p.opacity+")");
+			gradient.addColorStop(1, "rgba("+p.r+", "+p.g+", "+p.b+", 0)");
+			c.fillStyle = gradient;
+			c.arc(p.location.x, p.location.y, p.radius, Math.PI*2, false);
+			c.fill();
+			
+			//lets move the particles
+			p.remaining_life--;
+			p.radius--;
+			p.location.x += p.speed.x;
+			p.location.y += p.speed.y;
+			
+			if (p.remaining_life<0 || p.radius < 0)	{
+				particles[i] = new particle();
+			}
+		}
+	}
+	function m(d) {
+		return Math.round(d);
+	}
 			// end of submission //
 		</script>
 	
