@@ -35,149 +35,114 @@
 			// start of submission //
 			var sx = a.width/2,
 				sy = a.height/2,
-				planets = [];
+				m = Math;
 				
 			
-			function drawPlanet(x, y, r, col) {
-			var rgrad = c.createRadialGradient(x,y,0,x,y,r);
-rgrad.addColorStop(0, col);
-rgrad.addColorStop(1, 'black');
+			function dp(x, y, r, cl, cl2) {
+			var rgrad = c.createRadialGradient(x,y,0,x,y,r),
+				cl2 = cl2 ? cl2 : 'black';
+				rgrad.addColorStop(0, cl);
+				rgrad.addColorStop(1, cl2);
 				c.beginPath();
-			    c.arc(x, y, r, 0, 2 * Math.PI, false);
-			  	c.fillStyle = rgrad;
-			    c.fill();
+			    c.arc(x, y, r, 0, 2 * m.PI, false);
+			    pen(rgrad);
+			}
+			
+			function pen(fil) {
+				c.fillStyle = fil;
+				c.fill();
 			}
 
-			var p = function(x, y, vx, vy, ax, ay, size, centre, colour, cent) {
-				this.x = x;
-				this.y = y;
-				this.vx = vx;
-				this.vy = vy;
-				this.ax = ax;
-				this.ay = ay;
-				this.size = size;
-				this.centre = centre;
-				this.colour = colour;
-				this.movCent = cent;
+			function p(x, y, vx, vy, ax, ay, r, centre, colour, cent) {
+				return {
+					x : x,
+					y: y,
+					vx : vx,
+					vy: vy,
+					ax : ax,
+					ay : ay,
+					r : r,
+					centre : centre,
+					colour : colour,
+					movCent : cent
+				}
 			}
 			
-			var sun = new p(sx, sy, 0, 0, 0, 0, 20, null, 'yellow', false);
-			var mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 10, sun, 'red', false);
-			var earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 10, sun, 'blue', false);
+			var sun = new p(sx, sy, 0, 0, 0, 0, 20, null, 'yellow', false),
+				mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 10, sun, 'red', false),
+				earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 10, sun, 'blue', false),
+				moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 5, earth, 'gray', true),
+				jupiter = new p(sx + 200, sy - 200, -10, -10, 1.2, 1.2, 20, sun, 'purple', false),
+				ps = [ mars, earth, moon, jupiter];
+
+			function rnd(t) {
+				return (m.random() * t);
+			}
+			var ss = [], // stars
+				parts = [];
 			
-			var moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 5, earth, 'gray', true);
-			var jupiter = new p(sx + 200, sy - 200, -10, -10, 1.2, 1.2, 20, sun, 'purple', false);
-			planets = [ mars, earth, moon, jupiter];
+			for (i=0; i < 100; i++){
+				ss.push({x: rnd(2*sx), y: rnd(2*sy), s: rnd(2)});
+				parts.push(new particle());
+			}
 			
 			setInterval(function() {
+				c.clearRect(0,0,sx*2, sy*2);
+				c.rect(0,0,sx*2,sy*2);
+				pen('black');
 				
-				
-				//drawPlanet(sx, sy, 10, 'yellow');
-			}, 30);
-
-			function random(total) {
-				return (Math.random() * total);
-			}
-			function makeStars() {
-				var stars = [];
-				for (i=1; i < 100; i++){
-					stars.push({x: random(2*sx), y: random(2*sy), s: random(2)});
-				}
-				return stars;
-			}
-			
-			orbit();
-			function orbit() {
-				
-				var ss = makeStars();
-				
-				setInterval(function() {
-					c.clearRect(0,0,sx*2, sy*2);
-					c.rect(0,0,sx*2,sy*2);
-					c.fillStyle="black";
-					c.fill();
+				for (var i = 0; i < ps.length; i++) {
 					
-					for (var j = 0; j < ss.length; j++) {
-						drawPlanet(ss[j].x, ss[j].y, random(2), 'white');
+					var	aX = (ps[i].x > ps[i].centre.x) ? -ps[i].ax : ps[i].ax;
+					
+					var aY = (ps[i].y > ps[i].centre.y) ? -ps[i].ay : ps[i].ay;
+					
+					if (ps[i].movCent){
+						ps[i].x = ps[i].centre.x;
+						ps[i].y = ps[i].centre.y;
 					}
-						
-					for (var i = 0; i < planets.length; i++) {
-						
-						var	aX = (planets[i].x > planets[i].centre.x) ? -planets[i].ax : planets[i].ax;
-						
-						var aY = (planets[i].y > planets[i].centre.y) ? -planets[i].ay : planets[i].ay;
-						
-						//drawPlanet(planet.x, planet.y, 1 + planet.size + planet.size * (planet.y - sy)/sy, 'black');
-						if (planets[i].movCent){ // null if fixed e.g. sun
-							planets[i].x = planets[i].centre.x;
-							planets[i].y = planets[i].centre.y;
-						}
-						planets[i].x += planets[i].vx + (aX / 2);
-						planets[i].y += planets[i].vy + (aY / 2);
-						
-						drawPlanet(planets[i].x, planets[i].y, planets[i].size + planets[i].size * (planets[i].y - sy)/sy, planets[i].colour);
-						planets[i].vx += aX /2;
-						planets[i].vy += aY /2;
+					ps[i].x += ps[i].vx + (aX / 2);
+					ps[i].y += ps[i].vy + (aY / 2);
+					
+					dp(ps[i].x, ps[i].y, ps[i].r + ps[i].r * (ps[i].y - sy)/sy, ps[i].colour);
+					ps[i].vx += aX /2;
+					ps[i].vy += aY /2;
+				}
+				for (var j = 0; j < 100; j++) {
+					dp(ss[j].x, ss[j].y, rnd(2), 'white');
+				
+					var p = parts[j];
+					c.globalCompositeOperation = "lighter";
+					p.opac = R(p.remLife/p.life*100)/100
+					dp(p.x, p.y, p.r, "rgba("+p.rd+", "+p.g+", "+p.b+", "+p.opac+")", "rgba("+p.rd+", "+p.g+", "+p.b+", 0)");
+	
+					p.remLife--;
+					p.r--;
+					p.x += p.vx;
+					p.y += p.vy;
+			
+					if (p.remLife<0 || p.r < 0)	{
+						parts[j] = new particle();
 					}
-					draw();
-				}, 30)
+				}
+			}, 30)
+			
+			function particle()
+			{
+				var d = new p(sx, sy, -2.5+rnd(5), -3+rnd(4), 0, 0, 10+rnd(10));
+				d.rd = R(rnd(255));
+				d.g = R(rnd(100));
+				d.b = R(rnd(25));
+				d.life = 20+rnd(10);
+				d.remLife = d.life;
+				
+				return d;
 			}
-			
-			
-	var particles = [];
-
-	
-	//Lets create some particles now
-	var particle_count = 50;
-	for(var i = 0; i < particle_count; i++)
-	{
-		particles.push(new particle());
-	}
-	
-	function particle()
-	{
-		this.speed = {x: -2.5+random(5), y: -3+random(4)};
-		this.location = {x: sx, y: sy};
-		this.radius = 10+random(10);
-		this.life = 20+random(10);
-		this.remaining_life = this.life;
-		this.r = m(random(255));
-		this.g = m(random(100));
-		this.b = m(random(25));
-	}
-	
-	function draw()
-	{
-		c.globalCompositeOperation = "lighter";
 		
-		for(var i = 0; i < particles.length; i++)
-		{
-			var p = particles[i];
-			c.beginPath();
-			p.opacity = m(p.remaining_life/p.life*100)/100
-			var gradient = c.createRadialGradient(p.location.x, p.location.y, 0, p.location.x, p.location.y, p.radius);
-			gradient.addColorStop(0, "rgba("+p.r+", "+p.g+", "+p.b+", "+p.opacity+")");
-			gradient.addColorStop(0.5, "rgba("+p.r+", "+p.g+", "+p.b+", "+p.opacity+")");
-			gradient.addColorStop(1, "rgba("+p.r+", "+p.g+", "+p.b+", 0)");
-			c.fillStyle = gradient;
-			c.arc(p.location.x, p.location.y, p.radius, Math.PI*2, false);
-			c.fill();
-			
-			//lets move the particles
-			p.remaining_life--;
-			p.radius--;
-			p.location.x += p.speed.x;
-			p.location.y += p.speed.y;
-			
-			if (p.remaining_life<0 || p.radius < 0)	{
-				particles[i] = new particle();
+			function R(d) {
+				return m.round(d);
 			}
-		}
-	}
-	function m(d) {
-		return Math.round(d);
-	}
-			// end of submission //
+					// end of submission //
 		</script>
 	
 
