@@ -39,13 +39,13 @@
 				
 			
 			function dp(x, y, r, cl, cl2) {
-			var rgrad = c.createRadialGradient(x,y,0,x,y,r),
+			var grd = c.createRadialGradient(x,y,0,x,y,r),
 				cl2 = cl2 ? cl2 : 'black';
-				rgrad.addColorStop(0, cl);
-				rgrad.addColorStop(1, cl2);
+				grd.addColorStop(0, cl);
+				grd.addColorStop(1, cl2);
 				c.beginPath();
 			    c.arc(x, y, r, 0, 2 * m.PI, false);
-			    pen(rgrad);
+			    pen(grd);
 			}
 			
 			function pen(fil) {
@@ -53,7 +53,7 @@
 				c.fill();
 			}
 
-			function p(x, y, vx, vy, ax, ay, r, centre, colour, cent) {
+			function p(x, y, vx, vy, ax, ay, r, clr) {
 				return {
 					x : x,
 					y: y,
@@ -62,28 +62,26 @@
 					ax : ax,
 					ay : ay,
 					r : r,
-					centre : centre,
-					colour : colour,
-					movCent : cent
+					clr : clr
 				}
 			}
 			
-			var sun = new p(sx, sy, 0, 0, 0, 0, 20, null, 'yellow', false),
-				mars = new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 10, sun, 'red', false),
-				earth = new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 10, sun, 'blue', false),
-				moon = new p(earth.x - 20, earth.y + 20, 10, 10, 3, 3, 5, earth, 'gray', true),
-				jupiter = new p(sx + 200, sy - 200, -10, -10, 1.2, 1.2, 20, sun, 'purple', false),
-				ps = [ mars, earth, moon, jupiter];
-
+			var ps = [new p(sx, sy, 0, 0, 0, 0, 20, 'yellow'),
+				new p(sx + 100, sy - 100, 6, 6, 1.5, 1.5, 10, 'red'),
+				new p(sx + 50, sy - 50, 5, 5, 1.5, 1.5, 10, 'blue'),
+				new p(sx/3, sy/3, -5, 5, 0.5, 0.5, 25, 'yellow'),
+				new p(sx + 200, sy - 200, -10, -10, 1.2, 1.2, 20, 'purple')],
+				ss = [],
+				pts = [];
+				
 			function rnd(t) {
 				return (m.random() * t);
 			}
-			var ss = [], // stars
-				parts = [];
+			
 			
 			for (i=0; i < 100; i++){
 				ss.push({x: rnd(2*sx), y: rnd(2*sy), s: rnd(2)});
-				parts.push(new particle());
+				pts.push(new ple());
 			}
 			
 			setInterval(function() {
@@ -91,51 +89,40 @@
 				c.rect(0,0,sx*2,sy*2);
 				pen('black');
 				
-				for (var i = 0; i < ps.length; i++) {
+				for (var i = 0; i < 5; i++) {
 					
-					var	aX = (ps[i].x > ps[i].centre.x) ? -ps[i].ax : ps[i].ax;
+					var	aX = (ps[i].x > sx) ? -ps[i].ax : ps[i].ax;
 					
-					var aY = (ps[i].y > ps[i].centre.y) ? -ps[i].ay : ps[i].ay;
+					var aY = (ps[i].y > sy) ? -ps[i].ay : ps[i].ay;
 					
-					if (ps[i].movCent){
-						ps[i].x = ps[i].centre.x;
-						ps[i].y = ps[i].centre.y;
-					}
 					ps[i].x += ps[i].vx + (aX / 2);
 					ps[i].y += ps[i].vy + (aY / 2);
 					
-					dp(ps[i].x, ps[i].y, ps[i].r + ps[i].r * (ps[i].y - sy)/sy, ps[i].colour);
+					dp(ps[i].x, ps[i].y, ps[i].r + ps[i].r * (ps[i].y - sy)/sy, ps[i].clr);
 					ps[i].vx += aX /2;
 					ps[i].vy += aY /2;
 				}
 				for (var j = 0; j < 100; j++) {
 					dp(ss[j].x, ss[j].y, rnd(2), 'white');
 				
-					var p = parts[j];
+					var p = pts[j];
 					c.globalCompositeOperation = "lighter";
-					p.opac = R(p.remLife/p.life*100)/100
-					dp(p.x, p.y, p.r, "rgba("+p.rd+", "+p.g+", "+p.b+", "+p.opac+")", "rgba("+p.rd+", "+p.g+", "+p.b+", 0)");
+					dp(p.x, p.y, p.r, p.cll, p.cll);
 	
-					p.remLife--;
 					p.r--;
 					p.x += p.vx;
 					p.y += p.vy;
 			
-					if (p.remLife<0 || p.r < 0)	{
-						parts[j] = new particle();
+					if ( p.r < 0)	{
+						pts[j] = new ple();
 					}
 				}
 			}, 30)
 			
-			function particle()
+			function ple()
 			{
 				var d = new p(sx, sy, -2.5+rnd(5), -3+rnd(4), 0, 0, 10+rnd(10));
-				d.rd = R(rnd(255));
-				d.g = R(rnd(100));
-				d.b = R(rnd(25));
-				d.life = 20+rnd(10);
-				d.remLife = d.life;
-				
+				d.cll = "rgba(" + R(rnd(255)) +"," + R(rnd(150)) + "," + R(rnd(30)) + ", 0.1)";
 				return d;
 			}
 		
