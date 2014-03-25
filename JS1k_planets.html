@@ -36,19 +36,19 @@
 			q = a.width/2,
 				w = a.height/2,
 				m = Math;
-			k = '#000'
+			B = '#000'
 			
 			function P(x, y, r, l, l2) {
 			gd = c.createRadialGradient(x,y,0,x,y,r),
-				l2 = l2 ? l2 : k;
+				l2 = l2 ? l2 : B;
 				gd.addColorStop(0, l);
 				gd.addColorStop(1, l2);
 				c.beginPath();
 			    c.arc(x, y, r, 0, 2 * m.PI);
-			    d(gd);
+			    D(gd);
 			}
 			
-			function d(f) {
+			function D(f) {
 				c.fillStyle = f;
 				c.fill();
 			}
@@ -86,7 +86,7 @@
 			setInterval(function() {
 				c.clearRect(0,0,q*2, w*2);
 				c.rect(0,0,q*2,w*2);
-				d(k);
+				D(B);
 				
 				for (i = 0; i < 4; i++) {
 					
@@ -127,6 +127,5 @@
 			}
 					// end of submission //
 		</script>
-	
 
 </body></html>
